@@ -34,9 +34,7 @@ public class OrderService {
                 book.price(), quantity, OrderStatus.ACCEPTED);
     }
 
-    public static Order buildRejectedOrder(
-            String bookIsbn, int quantity
-    ){
+    public static Order buildRejectedOrder(String bookIsbn, int quantity){
         return Order.of(bookIsbn, null, null, quantity, OrderStatus.REJECTED);
     }
 }
