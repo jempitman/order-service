@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+@TestMethodOrder(MethodOrderer.Random.class)
 public class BookClientTests {
     private MockWebServer mockWebServer;
     private BookClient bookClient;
