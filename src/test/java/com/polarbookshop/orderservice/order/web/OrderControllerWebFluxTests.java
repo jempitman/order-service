@@ -3,8 +3,6 @@ package com.polarbookshop.orderservice.order.web;
 import com.polarbookshop.orderservice.order.domain.Order;
 import com.polarbookshop.orderservice.order.domain.OrderService;
 import com.polarbookshop.orderservice.order.domain.OrderStatus;
-import com.polarbookshop.orderservice.web.OrderController;
-import com.polarbookshop.orderservice.web.OrderRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
