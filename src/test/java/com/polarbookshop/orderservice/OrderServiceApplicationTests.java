@@ -3,6 +3,7 @@ package com.polarbookshop.orderservice;
 import com.polarbookshop.orderservice.book.Book;
 import com.polarbookshop.orderservice.book.BookClient;
 import com.polarbookshop.orderservice.order.domain.Order;
+import com.polarbookshop.orderservice.order.domain.OrderStatus;
 import com.polarbookshop.orderservice.order.web.OrderRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,24 @@ class OrderServiceApplicationTests {
 				});
 	}
 
+	@Test
+	void whenPostRequestAndBookExistsThenOrderAccepted(){
+		String bookIsbn = "1234567899";
+		Book book = new Book(bookIsbn, "Title", "Author", 9.90);
+		given(bookClient.getBookByIsbn(bookIsbn)).willReturn(Mono.just(book));
+		OrderRequest orderRequest = new OrderRequest(bookIsbn, 3);
 
+		Order createdOrder = webTestClient.post().uri("/orders")
+				.bodyValue(orderRequest)
+				.exchange()
+				.expectStatus().is2xxSuccessful()
+				.expectBody(Order.class).returnResult().getResponseBody();
 
+		assertThat(createdOrder).isNotNull();
+		assertThat(createdOrder.bookIsbn()).isEqualTo(orderRequest.isbn());
+		assertThat(createdOrder.quantity()).isEqualTo(orderRequest.quantity());
+		assertThat(createdOrder.bookName()).isEqualTo(book.title() + " - " + book.author());
+		assertThat(createdOrder.bookPrice()).isEqualTo(book.price());
+		assertThat(createdOrder.status()).isEqualTo(OrderStatus.ACCEPTED);
+	}
 }
