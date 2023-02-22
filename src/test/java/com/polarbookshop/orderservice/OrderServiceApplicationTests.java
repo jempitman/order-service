@@ -90,4 +90,23 @@ class OrderServiceApplicationTests {
 		assertThat(createdOrder.bookPrice()).isEqualTo(book.price());
 		assertThat(createdOrder.status()).isEqualTo(OrderStatus.ACCEPTED);
 	}
+
+	@Test
+	void whenPostRequestAndBookNotExistsThenOrderAccepted(){
+		String bookIsbn = "1234567894";
+		given(bookClient.getBookByIsbn(bookIsbn)).willReturn(Mono.empty());
+		OrderRequest orderRequest = new OrderRequest(bookIsbn, 3);
+
+		Order createdOrder = webTestClient.post().uri("/orders")
+				.bodyValue(orderRequest)
+				.exchange()
+				.expectStatus().is2xxSuccessful()
+				.expectBody(Order.class).returnResult().getResponseBody();
+
+		assertThat(createdOrder).isNotNull();
+		assertThat(createdOrder.bookIsbn()).isEqualTo(orderRequest.isbn());
+		assertThat(createdOrder.quantity()).isEqualTo(orderRequest.quantity());
+		assertThat(createdOrder.status()).isEqualTo(OrderStatus.REJECTED);
+
+	}
 }
