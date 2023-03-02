@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.cloud:spring-cloud-stream-binder-rabbit'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.springframework.retry:spring-retry'
 
 	runtimeOnly 'org.flywaydb:flyway-core'
 	runtimeOnly 'org.postgresql:postgresql'

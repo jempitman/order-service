@@ -26,9 +26,14 @@ spring:
   cloud:
     config:
       uri: http://localhost:888
-      request-connect-timeout: 5000
-      request-read-timeout: 5000
+      request-connect-timeout: 5000 #5s
+      request-read-timeout: 5000 #5s
       fail-fast: false #set to true in production
+      retry:
+        max-attempts: 6
+        initial-interval: 1000 #1s
+        max-interval: 2000 #2s
+        multiplier: 1.1
     function:
       definition: dispatchOrder
     stream:
