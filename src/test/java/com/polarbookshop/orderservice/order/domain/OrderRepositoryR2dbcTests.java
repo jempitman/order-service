@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.util.Objects;
+
 
 @DataR2dbcTest
 @Import(DataConfig.class)
@@ -54,5 +56,15 @@ class OrderRepositoryR2dbcTests {
         StepVerifier.create(orderRepository.save(rejectedOrder))
                 .expectNextMatches(order -> order.status().equals(OrderStatus.REJECTED))
                 .verifyComplete();
+    }
+
+    @Test
+    void whenCreateOrderNotAuthenticatedThenNoMetaData(){
+        var rejectedOrder = OrderService.buildRejectedOrder("1234567890", 3);
+        StepVerifier.create(orderRepository.save(rejectedOrder))
+                .expectNextMatches(order -> Objects.isNull(order.createdBy()) &&
+                        Objects.isNull(order.lastModifiedBy()))
+                .verifyComplete();
+
     }
 }
