@@ -149,13 +149,14 @@ class OrderServiceApplicationTests {
 	}
 
 	@Test
-	void whenPostRequestAndBookExistsThenOrderAccepted () throws IOException{
+	void whenAuthenticatedPostRequestAndBookExistsThenOrderAccepted () throws IOException{
 		String bookIsbn = "1234567899";
 		Book book = new Book(bookIsbn, "Title", "Author", 9.90);
 		given(bookClient.getBookByIsbn(bookIsbn)).willReturn(Mono.just(book));
 		OrderRequest orderRequest = new OrderRequest(bookIsbn, 3);
 
 		Order createdOrder = webTestClient.post().uri("/orders")
+				.headers(headers -> headers.setBearerAuth(bjornTokens.accessToken()))
 				.bodyValue(orderRequest)
 				.exchange()
 				.expectStatus().is2xxSuccessful()
@@ -173,13 +174,13 @@ class OrderServiceApplicationTests {
 	}
 
 	@Test
-	void whenPostRequestAndBookNotExistsThenOrderAccepted(){
+	void whenAuthenticatedPostRequestAndBookNotExistsThenOrderRejected(){
 		String bookIsbn = "1234567894";
 		given(bookClient.getBookByIsbn(bookIsbn)).willReturn(Mono.empty());
 		OrderRequest orderRequest = new OrderRequest(bookIsbn, 3);
 
 		Order createdOrder = webTestClient.post().uri("/orders")
-				.bodyValue(orderRequest)
+				.headers(headers -> headers.setBearerAuth(bjornTokens.accessToken())).bodyValue(orderRequest)
 				.exchange()
 				.expectStatus().is2xxSuccessful()
 				.expectBody(Order.class).returnResult().getResponseBody();
