@@ -50,12 +50,42 @@ class OrderServiceApplicationTests {
 			new KeycloakContainer("quay.io/keycloak/keycloak:19.0")
 					.withRealmImportFile("test-realm-config.json");
 
+	@Container
+	static PostgreSQLContainer<?> postgresql =
+			new PostgreSQLContainer<>(DockerImageName.parse("postgres:14.4"));
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Autowired
+	private OutputDestination output;
+
+	@Autowired
+	private WebTestClient webTestClient;
+
+	@MockBean
+	private BookClient bookClient;
+
+	@DynamicPropertySource
+	static void setPostgresqlProperties(DynamicPropertyRegistry registry){
+		registry.add("spring.r2dbc.url", OrderServiceApplicationTests::r2dbcUrl);
+		registry.add("spring.r2dbc.username", postgresql::getUsername);
+		registry.add("spring.r2dbc.password", postgresql::getPassword);
+		registry.add("spring.flyway.url", postgresql::getJdbcUrl);
+		registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri",
+				() -> keycloakContainer.getAuthServerUrl() + "realms/PolarBookshop");
+	}
+
+	private static String r2dbcUrl(){
+		return String.format("r2dbc:postgresql://%s:%s/%s", postgresql.getHost(),
+				postgresql.getMappedPort(PostgreSQLContainer.POSTGRESQL_PORT), postgresql.getDatabaseName());
+	}
 
 	@BeforeAll
 	static void generateAccessTokens(){
 		WebClient webClient = WebClient.builder()
 				.baseUrl(keycloakContainer.getAuthServerUrl()
-				+ "realms/PolarBookshop/protocol/openid-connect/token")
+						+ "realms/PolarBookshop/protocol/openid-connect/token")
 				.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 				.build();
 		isabelleTokens = authenticateWith(
@@ -88,37 +118,6 @@ class OrderServiceApplicationTests {
 		){
 			this.accessToken = accessToken;
 		}
-	}
-
-	@Container
-	static PostgreSQLContainer<?> postgresql =
-			new PostgreSQLContainer<>(DockerImageName.parse("postgres:14.4"));
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private OutputDestination output;
-
-	@Autowired
-	private WebTestClient webTestClient;
-
-	@MockBean
-	private BookClient bookClient;
-
-	@DynamicPropertySource
-	static void setPostgresqlProperties(DynamicPropertyRegistry registry){
-		registry.add("spring.r2dbc.url", OrderServiceApplicationTests::r2dbcUrl);
-		registry.add("spring.r2dbc.username", postgresql::getUsername);
-		registry.add("spring.r2dbc.password", postgresql::getPassword);
-		registry.add("spring.flyway.url", postgresql::getJdbcUrl);
-		registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri",
-				() -> keycloakContainer.getAuthServerUrl() + "realms/PolarBookshop");
-	}
-
-	private static String r2dbcUrl(){
-		return String.format("r2dbc:postgresql://%s:%s/%s", postgresql.getHost(),
-				postgresql.getMappedPort(PostgreSQLContainer.POSTGRESQL_PORT), postgresql.getDatabaseName());
 	}
 
 	@Test
