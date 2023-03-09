@@ -30,10 +30,13 @@ import org.testcontainers.utility.DockerImageName;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpHeaders;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -144,6 +147,47 @@ class OrderServiceApplicationTests {
 				.expectBodyList(Order.class).value(orders -> {
 					assertThat(orders.stream().filter(order -> order.bookIsbn().equals(bookIsbn))
 							.findAny()).isNotEmpty();
+				});
+	}
+
+	@Test
+	void wheGetOrdersForAnotherUserThenNotReturned() throws IOException {
+		String bookIsbn = "1234567899";
+		Book book = new Book(bookIsbn, "Title", "Author", 9.90);
+		given(bookClient.getBookByIsbn(bookIsbn)).willReturn(Mono.just(book));
+		OrderRequest orderRequest = new OrderRequest(bookIsbn, 1);
+
+		Order orderByBjorn = webTestClient.post().uri("/orders")
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(bjornTokens.accessToken()))
+				.bodyValue(orderRequest)
+				.exchange()
+				.expectStatus().is2xxSuccessful()
+				.expectBody(Order.class).returnResult().getResponseBody();
+		assertThat(orderByBjorn).isNotNull();
+		assertThat(objectMapper.readValue(output.receive().getPayload(), OrderAcceptedMessage.class))
+				.isEqualTo(new OrderAcceptedMessage(orderByBjorn.id()));
+
+		Order orderByIsabelle = webTestClient.post().uri("/orders")
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(isabelleTokens.accessToken()))
+				.bodyValue(orderRequest)
+				.exchange()
+				.expectStatus().is2xxSuccessful()
+				.expectBody(Order.class).returnResult().getResponseBody();
+		assertThat(orderByIsabelle).isNotNull();
+		assertThat(objectMapper.readValue(output.receive().getPayload(), OrderAcceptedMessage.class))
+				.isEqualTo(new OrderAcceptedMessage(orderByIsabelle.id()));
+
+		webTestClient.get().uri("/orders")
+				.headers(headers -> headers.setBearerAuth(bjornTokens.accessToken()))
+				.exchange()
+				.expectStatus().is2xxSuccessful()
+				.expectBodyList(Order.class)
+				.value(orders -> {
+					List<Long> orderIds = orders.stream()
+							.map(Order::id)
+							.collect(Collectors.toList());
+					assertThat(orderIds).contains(orderByBjorn.id());
+					assertThat(orderIds).doesNotContain(orderByIsabelle.id());
 				});
 	}
 
