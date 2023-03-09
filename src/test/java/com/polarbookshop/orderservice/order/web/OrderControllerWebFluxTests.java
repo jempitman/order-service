@@ -23,7 +23,6 @@ import static org.mockito.BDDMockito.given;
 @Import(SecurityConfig.class)
 public class OrderControllerWebFluxTests {
 
-    public static final String ROLE_EMPLOYEE = "ROLE_employee";
     public static final String ROLE_CUSTOMER = "ROLE_customer";
 
     @Autowired
