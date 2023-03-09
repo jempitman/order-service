@@ -2,6 +2,7 @@ package com.polarbookshop.orderservice.order.domain;
 
 import com.polarbookshop.orderservice.config.DataConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -65,6 +66,15 @@ class OrderRepositoryR2dbcTests {
                 .expectNextMatches(order -> Objects.isNull(order.createdBy()) &&
                         Objects.isNull(order.lastModifiedBy()))
                 .verifyComplete();
+    }
 
+    @Test
+    @WithMockUser("jeremy")
+    void whenCreateOrderAuthenticatedThenNoMetaData() {
+        var rejectedOrder= OrderService.buildRejectedOrder("1234567890", 3);
+        StepVerifier.create(orderRepository.save(rejectedOrder))
+                .expectNextMatches(order -> order.createdBy().equals("jeremy") &&
+                        order.lastModifiedBy().equals("jeremy"))
+                .verifyComplete();
     }
 }
