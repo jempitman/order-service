@@ -2,6 +2,8 @@ package com.polarbookshop.orderservice.order.web;
 
 import com.polarbookshop.orderservice.order.domain.Order;
 import com.polarbookshop.orderservice.order.domain.OrderService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,8 +21,10 @@ public class OrderController {
     }
 
     @GetMapping
-    public Flux<Order> getAllOrders(){
-        return orderService.getAllOrders();
+    public Flux<Order> getAllOrders(
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        return orderService.getAllOrders(jwt.getSubject());
     }
 
     @PostMapping
