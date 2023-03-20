@@ -1,8 +1,6 @@
 package com.polarbookshop.orderservice.config;
 
-import org.springframework.boot.autoconfigure.rsocket.RSocketProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -15,6 +13,7 @@ public class SecurityConfig {
     SecurityWebFilterChain filterChain(ServerHttpSecurity http){
         return http
                 .authorizeExchange(exchange -> exchange
+                        .pathMatchers("/actuator/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(

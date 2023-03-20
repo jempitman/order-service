@@ -28,6 +28,7 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.retry:spring-retry'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	runtimeOnly 'org.flywaydb:flyway-core'
 	runtimeOnly 'org.postgresql:postgresql'
