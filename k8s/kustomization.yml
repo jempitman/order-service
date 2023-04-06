@@ -7,4 +7,8 @@ resources:
 
 configMapGenerator:
   - name: order-service
-    file:
+    files:
+      - application.yml
+    options:
+      labels:
+        app: order-service
