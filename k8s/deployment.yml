@@ -40,3 +40,10 @@ spec:
               port: 9002
             initialDelaySeconds: 90
             periodSeconds: 15
+          volumeMounts:
+            - mountPath: /workspace/config
+              name: order-service-volume
+      volumes:
+        - name: order-config-volume
+          configMap:
+            name: order-config
