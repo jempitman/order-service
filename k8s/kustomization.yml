@@ -6,7 +6,7 @@ resources:
   - service.yml
 
 configMapGenerator:
-  - name: order-service
+  - name: order-config
     files:
       - application.yml
     options:
