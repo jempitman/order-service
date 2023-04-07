@@ -32,13 +32,13 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 9002
-            initialDelaySeconds: 120
+            initialDelaySeconds: 180 # 3min
             periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 9002
-            initialDelaySeconds: 120
+            initialDelaySeconds: 180 # 3min
             periodSeconds: 15
           volumeMounts:
             - mountPath: /workspace/config
