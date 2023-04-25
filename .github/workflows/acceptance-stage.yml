@@ -6,6 +6,13 @@ on:
     branch: main
 concurrency: acceptance
 
+env:
+  OWNER: jempitman
+  REGISTRY: ghcr.io
+  APP_REPO: order-service
+  DEPLOY_REPO: polar-deployment
+  VERSION: ${{ github.sha }}
+
 jobs:
   functional:
     name: Functional Acceptance Tests
